@@ -32,6 +32,17 @@ optimizations have a significantly beneficial impact on performance of encoding
 compared to other solutions like the standard `URLEncoder` in the JDK or
 `UriUtils` in Spring.
 
+## Changes
+
+Forked to use this library on more KMP platforms with concise Gradle DSL scripts.
+
+- Remove publishing buildSrc
+- Remove UrlEncoder CLI
+- Enabling all available KMP Targets
+- Refractor Gradle scripts
+- No code change in Util for compatibility with upstream
+- JitPack.io supports
+
 
 ## Examples (TL;DR)
 

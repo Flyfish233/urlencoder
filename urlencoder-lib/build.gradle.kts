@@ -1,46 +1,57 @@
-import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 
 plugins {
-    buildsrc.conventions.lang.`kotlin-multiplatform-jvm`
-    buildsrc.conventions.lang.`kotlin-multiplatform-js`
-    buildsrc.conventions.lang.`kotlin-multiplatform-native`
-    buildsrc.conventions.publishing
-    id("com.github.ben-manes.versions")
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidLibrary)
 }
 
 kotlin {
+    jvm()
+
+    js {
+        nodejs()
+    }
+
+    linuxX64()
+    linuxArm64()
+
+    mingwX64()
+
+    androidTarget {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "17"
+            }
+        }
+        publishAllLibraryVariants()
+    }
+
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+    macosX64()
+    macosArm64()
+    tvosX64()
+    tvosArm64()
+    tvosSimulatorArm64()
+    watchosX64()
+    watchosArm64()
+    watchosSimulatorArm64()
+
     sourceSets {
-        commonTest {
+        val commonTest by getting {
             dependencies {
-                implementation(kotlin("test"))
+                implementation(libs.kotlin.test)
             }
         }
     }
 }
 
-
-base {
-    archivesName.set("${rootProject.name}-lib")
-}
-
-tasks {
-    dokkaJavadoc {
-        dokkaSourceSets {
-            configureEach {
-                suppress.set(true)
-            }
-
-            val commonMain by getting {
-                suppress.set(false)
-                platform.set(org.jetbrains.dokka.Platform.jvm)
-            }
-        }
-
-    }
-
-    withType<DokkaTask>().configureEach {
-        dokkaSourceSets.configureEach {
-            moduleName.set("UrlEncoder Library")
-        }
+android {
+    namespace = "net.thauvin.erik.urlencoder"
+    compileSdk = 34
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }

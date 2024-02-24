@@ -1,54 +1,40 @@
-name: gradle-ci
+name: Gradle Build
 
 on:
   push:
-    branches:
-      - master
+    branches: [ "master" ]
   pull_request:
-    branches:
-      - master
-  workflow_dispatch:
+    branches: [ "master" ]
 
-concurrency:
-  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
-  cancel-in-progress: true
+permissions:
+  contents: read
 
 jobs:
   build:
     strategy:
       matrix:
-        java-version: [ 11, 17, 20 ]
-        os:
-          - macos-latest
-          - ubuntu-latest
-          - windows-latest
-      fail-fast: false
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
     runs-on: ${{ matrix.os }}
-    env:
-      GRADLE_OPTS: "-Dorg.gradle.jvmargs=-XX:MaxMetaspaceSize=512m"
-
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up JDK ${{ matrix.java-version }}
-        uses: actions/setup-java@v3
+      - uses: actions/checkout@main
+      - name: Set up JDK
+        uses: actions/setup-java@main
         with:
+          java-version: '17'
           distribution: 'zulu'
-          java-version: ${{ matrix.java-version }}
 
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v1
-
-      - name: Cache Kotlin Konan
-        id: cache-kotlin-konan
-        uses: actions/cache@v3
+      - name: Build with Gradle
+        uses: gradle/gradle-build-action@main
         with:
-          path: |
-            ~/.konan/**/*
-          key: kotlin-konan-${{ runner.os }}
+          arguments: 'build'
 
-      - name: Test with Gradle
-        uses: gradle/gradle-build-action@v2
+      - name: Publish Test
+        uses: gradle/gradle-build-action@main
         with:
-          gradle-home-cache-cleanup: true
-          arguments: build check --stacktrace -PtestsBadgeApiKey=${{ secrets.TESTS_BADGE_API_KEY }}
+          arguments: 'publish'
+
+      - name: Save outputs
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{ matrix.os }}.zip
+          path: urlencoder-lib/build/
